@@ -7,12 +7,22 @@ date: "2024-03-24"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(highcharter)
 ```
+
 
 ### introduction
 
-- Qué tipo de variación ocurre dentro de mis variables?
-- Qué tipo de covarianza ocurre entre mis variables
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Suponiendo que 'mi_dataset' es el nombre de tu dataset
+# Ver los nombres de las columnas
+names(diamonds)
+
+```
+
+
+-   Qué tipo de variación ocurre dentro de mis variables?
+-   Qué tipo de covarianza ocurre entre mis variables
 
 ```{r}
 library(datos)
@@ -20,18 +30,177 @@ diamantes
 ```
 
 ```{r , echo=FALSE}
-diamonds <- diamantes
+df <- diamantes
 ```
 
 ## variation
+
 ```{r bar_plot , R.options=list(width=800, height=600) }
-ggplot(diamonds) +
+ggplot(df) +
   geom_bar(aes(x = corte))
 ```
+
 # resumen de datos categoricos para corte
+
 ```{r}
 
 
-diamonds %>% count(corte)
+df %>% count(corte)
 ```
+
+## histograma
+
+```{r}
+# Crear el gráfico con ggplot2
+gg <- ggplot(df) + geom_histogram(aes(x = quilate), binwidth = 0.5)
+
+
+```
+
+##e
+
+```{r}
+
+# Convertir ggplot a objeto Highchart
+hc <- highchart() %>% hc_add_series(ggplot_build(gg)$data[[1]])%>% 
+  hc_xAxis(title = list(text = "Quilates"))
+# Mostrar el gráfico
+hc
+```
+
+
+## data cleaning
+#y
+```{r creacion dataset}
+# Crea un conjunto de datos pequeño a partir del conjunto de datos "diamonds"
+small <- df %>%
+  # Filtra las filas donde el quilate es menor a 3
+  filter(quilate < 3)
+
+# Inspecciona las primeras 6 filas del conjunto de datos pequeño
+
+```
+
+#small
+```{r}
+head(small)
+```
+```{r small_hist}
+ggplot(small, aes(x = quilate)) +
+  geom_histogram(binwidth = 0.1)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+install.packages("ggh4x")
+library(ggh4x)  # Si no hay errores, la instalación ha sido correcta.
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(ggh4x)  # Si no hay errores, la instalación ha sido correcta.
+
+```
+La pregunta clave es: **¿Cómo varían el precio y el quilate de los diamantes en función de su claridad y qué relación existe entre estas variables?**
+
+La respuesta esperada sería:
+*Observamos que hay una tendencia general de que los diamantes con mayor claridad tienden a tener precios más altos.*
+
+
+```{r}
+library(ggplot2)
+library(ggh4x)
+
+ggplot(df, aes(x = precio, y = quilate  )) +
+  geom_point() +
+  facet_nested(~ claridad , nest_line = TRUE) +
+  theme_minimal() +
+  theme(ggh4x.facet.nestline = element_line(color = "blue"))
+
+
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+
+```
+
+#TAMAÑO ES
+```{r}
+x <- df$x
+y <- df$y
+z <- df$z
+
+
+
+```
+
+
+
+```{r}
+# Calcular el promedio por fila y almacenarlo en una nueva columna
+df$promedio_XYZ <- rowMeans(df[, c('x', 'y', 'z')])
+
+# Mostrar las primeras filas del dataframe con el nuevo promedio calculado
+head(df)
+
+```
+```{r}
+view(diamonds)
+```
+
+
+```{r}
+# Crear el gráfico ggplot
+ggplot(df, aes(x = precio, y = promedio_XYZ, color = claridad, size = quilate)) +
+  geom_point(shape = 16) +
+  geom_smooth(aes(group = claridad), method = "lm", se = FALSE, color = "blue", size = 1, linetype = "dashed") +
+  facet_nested(~ claridad, nest_line = TRUE) +
+  theme_minimal()
+```
+
+# Pregunta clave:
+La pregunta clave es: **¿Cómo varían el precio y el quilate de los diamantes en función de su claridad y qué relación existe entre estas variables?**
+
+# Respuesta esperada:
+Observamos que hay una tendencia general de que los diamantes con mayor claridad tienden a tener precios más altos.
+.
+
+```{r}
+library(datos)  # Cargando la librería 'datos' que contiene el dataframe 'diamantes'
+
+# Calcular el promedio por fila y almacenarlo en una nueva columna
+df$promedio_XYZ <- rowMeans(df[, c('x', 'y', 'z')])
+
+# Definir los intervalos y las etiquetas
+intervalos <- c(0, 3.5, 4, 5, Inf)  # Definimos los intervalos: 0-3.5, 3.5-4, 4-5, 5-infinito
+etiquetas <- c("Bajo", "Medio-Bajo", "Medio-Alto", "Alto")  # Definimos las etiquetas para cada intervalo
+
+# Categorizar el promedio_XYZ
+df$categoria_promedio <- cut(df$promedio_XYZ, breaks = intervalos, labels = etiquetas, right = FALSE)
+
+# Crear el gráfico ggplot
+ggplot(df, aes(x = promedio_XYZ, y = precio , color = claridad, size = quilate, shape = categoria_promedio)) +
+  geom_point() +
+  facet_nested(~ claridad, nest_line = TRUE) +
+  theme_minimal()+
+  labs(title = "Relación entre Precio y Promedio XYZ Categorizado")
+
+```
+
+
+
+- 
+'¿Qué hacer con los valores nulos?'
+## valores atipícos
+```{r}
+
+```
+
+
+¿Por qué hay más diamantes en quilates enteros?
+¿Por qué hay más diamantes que están más a la derecha de los quilates comunes?
+
 
